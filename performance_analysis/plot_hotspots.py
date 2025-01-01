@@ -65,7 +65,7 @@ def parse_profile(prof_file, top_n=5):
             # Build something like: ("update_densities", 3.45)
             hotspots.append((funcname, cumulative_time))
 
-    return hotspots[:5]
+    return hotspots[:top_n]
 
 
 def plot_hotspots(hotspots, out_file, title="Hotspot Functions"):

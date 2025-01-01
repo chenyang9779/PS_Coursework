@@ -6,7 +6,7 @@ generate_landscapes.py
 Generates .dat files for all-land predator-prey landscapes of various sizes.
 Each file has a width, a height, and all cells set to '1'.
 
-Output files:
+Default output files:
   - 50x50land.dat
   - 100x100land.dat
   - 150x150land.dat

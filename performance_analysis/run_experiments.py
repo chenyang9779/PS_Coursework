@@ -107,7 +107,7 @@ def run_simulation(landscape_file, time_step, out_csv):
     # Using psutil to spawn the subprocess for resource monitoring
     process = psutil.Popen(cmd)
     # Start monitoring in parallel
-    monitor_resources(process, usage_csv_path, poll_interval=0.5)
+    monitor_resources(process, usage_csv_path, poll_interval=0.1)
 
     end_time = time.time()
     runtime = end_time - start_time

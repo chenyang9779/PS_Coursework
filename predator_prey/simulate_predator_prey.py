@@ -238,7 +238,7 @@ def initialize_csv():
         f.write(hdr)
 
 
-def update_densities(
+def update_densities_vec(
     mice_density,
     foxes_density,
     mice_birth_rate,
@@ -250,80 +250,82 @@ def update_densities(
     num_neighbours,
     landscape,
     delta_t,
-    height,
-    width,
 ):
     """
-    Update the densities of mice and foxes for a single simulation step.
-
-    Population model includes births, deaths, and diffusion (spatial spread).
-    - Mice can be born at a constant rate and die due to predation by foxes.
-    - Foxes can be born in proportion to the mice population and die at a natural rate.
-    - Both mice and foxes can diffuse to neighboring land cells.
+    Update the population densities of mice and foxes using a reaction-diffusion model.
 
     Parameters:
-        mice_density (np.ndarray): Current mice densities (2D array with halo).
-        foxes_density (np.ndarray): Current fox densities (2D array with halo).
-        mice_birth_rate (float): Birth rate for mice.
-        foxes_birth_rate (float): Birth rate for foxes.
-        mice_death_rate (float): Death rate for mice (predation or other causes).
-        foxes_death_rate (float): Death rate for foxes (e.g., starvation).
-        mice_diffusion_rate (float): Diffusion rate for mice.
-        foxes_diffusion_rate (float): Diffusion rate for foxes.
-        num_neighbours (np.ndarray): Number of land neighbors for each cell (2D array).
-        landscape (np.ndarray): 2D array (with halo) indicating which cells are land/water.
-        delta_t (float): Time step size for the simulation.
-        height (int): The original (inner) height of the landscape (without halo).
-        width (int): The original (inner) width of the landscape (without halo).
+    - mice_density: 2D array representing the current density of mice.
+    - foxes_density: 2D array representing the current density of foxes.
+    - mice_birth_rate: Scalar, birth rate of mice.
+    - foxes_birth_rate: Scalar, birth rate of foxes (dependent on mice population).
+    - mice_death_rate: Scalar, death rate of mice due to predation.
+    - foxes_death_rate: Scalar, natural death rate of foxes.
+    - mice_diffusion_rate: Scalar, diffusion rate of mice across the landscape.
+    - foxes_diffusion_rate: Scalar, diffusion rate of foxes across the landscape.
+    - num_neighbours: 2D array representing the number of neighbors for each cell.
+    - landscape: 2D array indicating valid areas (non-zero values indicate valid regions).
+    - delta_t: Scalar, time step for the update.
 
     Returns:
-        tuple: Updated mice and fox densities (mice_density, foxes_density)
-               after one simulation step.
+    - new_mice_density: Updated 2D array of mice densities.
+    - new_foxes_density: Updated 2D array of fox densities.
     """
+
+    # Create copies of input denties, avoid modifying the original arrays
     new_mice_density = mice_density.copy()  # Copy current mice density
     new_foxes_density = foxes_density.copy()  # Copy current fox density
 
-    for x in range(1, height + 1):
-        for y in range(1, width + 1):
-            if landscape[x, y]:
-                # Mice population dynamics with diffusion
-                new_mice_density[x, y] = mice_density[x, y] + delta_t * (
-                    (mice_birth_rate * mice_density[x, y])
-                    - (mice_death_rate * mice_density[x, y] * foxes_density[x, y])
-                    + mice_diffusion_rate
-                    * (
-                        (
-                            mice_density[x - 1, y]
-                            + mice_density[x + 1, y]
-                            + mice_density[x, y - 1]
-                            + mice_density[x, y + 1]
-                        )
-                        - (num_neighbours[x, y] * mice_density[x, y])
-                    )
-                )
-                # Ensure mice density doesn't go below zero
-                if new_mice_density[x, y] < 0:
-                    new_mice_density[x, y] = 0
+    # Mask for valid landscape areas(non-zero entries int he landscape array)
+    mask_land = landscape != 0
 
-                # Fox population dynamics with diffusion
-                new_foxes_density[x, y] = foxes_density[x, y] + delta_t * (
-                    (foxes_birth_rate * mice_density[x, y] * foxes_density[x, y])
-                    - (foxes_death_rate * foxes_density[x, y])
-                    + foxes_diffusion_rate
-                    * (
-                        (
-                            foxes_density[x - 1, y]
-                            + foxes_density[x + 1, y]
-                            + foxes_density[x, y - 1]
-                            + foxes_density[x, y + 1]
-                        )
-                        - (num_neighbours[x, y] * foxes_density[x, y])
-                    )
-                )
-                # Ensure fox density doesn't go below zero
-                if new_foxes_density[x, y] < 0:
-                    new_foxes_density[x, y] = 0
+    # Extract the interior regoin (ignore boundary)
+    mice_in = mice_density[1:-1, 1:-1]
+    fox_in = foxes_density[1:-1, 1:-1]
+    land_in = mask_land[1:-1, 1:-1]
+    neighbours_in = num_neighbours[1:-1, 1:-1]
 
+    # Compute the neighbour values for mice
+    up_m = mice_density[0:-2, 1:-1]
+    down_m = mice_density[2:, 1:-1]
+    left_m = mice_density[1:-1, 0:-2]
+    right_m = mice_density[1:-1, 2:]
+
+    # Laplacian mice population
+    lap_mice = (up_m + down_m + left_m + right_m) - (neighbours_in * mice_in)
+
+    # Compute the neighbour values for foxes
+    up_f = foxes_density[0:-2, 1:-1]
+    down_f = foxes_density[2:, 1:-1]
+    left_f = foxes_density[1:-1, 0:-2]
+    right_f = foxes_density[1:-1, 2:]
+
+    # Laplacian foxes population
+    lap_foxes = (up_f + down_f + left_f + right_f) - (neighbours_in * fox_in)
+
+    # Growth of mice and foxes
+    growth_mice = mice_birth_rate * mice_in - (mice_death_rate * mice_in * fox_in)
+    growth_fox = (foxes_birth_rate * mice_in * fox_in) - foxes_death_rate * fox_in
+
+    # Change in density for mice and foxes regarding growth and diffusion
+    dt_mice = growth_mice + mice_diffusion_rate * lap_mice
+    dt_fox = growth_fox + foxes_diffusion_rate * lap_foxes
+
+    # update densities using the computed values
+    new_in_mice = mice_in + delta_t * dt_mice
+    new_in_fox = fox_in + delta_t * dt_fox
+
+    # Make sure all values are non-negative
+    new_in_mice = np.clip(new_in_mice, 0, None)
+    new_in_fox = np.clip(new_in_fox, 0, None)
+
+    # Enforce valid areas
+    new_in_mice[~land_in] = 0
+    new_in_fox[~land_in] = 0
+
+    # Update new densities for the inner region and return the updated values
+    new_mice_density[1:-1, 1:-1] = new_in_mice
+    new_foxes_density[1:-1, 1:-1] = new_in_fox
     return new_mice_density, new_foxes_density
 
 
@@ -492,7 +494,7 @@ def run_predator_prey_simulation(
             )
 
         # Update densities for the next timestep
-        new_mice_density, new_foxes_density = update_densities(
+        new_mice_density, new_foxes_density = update_densities_vec(
             mice_density,
             foxes_density,
             mice_birth_rate,
@@ -504,8 +506,6 @@ def run_predator_prey_simulation(
             num_neighbours,
             landscape,
             delta_t,
-            height,
-            width,
         )
 
         # Swap arrays for next iteration.
