@@ -1,0 +1,22 @@
+Landscape File,Time Step,Runtime (s),Profile File
+100x100land.dat,50,46.030,/home/chenyang9779/s2693586/performance_analysis/results/profile_100x100land_ts50.prof
+100x100land.dat,75,45.039,/home/chenyang9779/s2693586/performance_analysis/results/profile_100x100land_ts75.prof
+100x100land.dat,100,44.603,/home/chenyang9779/s2693586/performance_analysis/results/profile_100x100land_ts100.prof
+500x500land.dat,50,1148.813,/home/chenyang9779/s2693586/performance_analysis/results/profile_500x500land_ts50.prof
+500x500land.dat,75,1142.271,/home/chenyang9779/s2693586/performance_analysis/results/profile_500x500land_ts75.prof
+500x500land.dat,100,1180.360,/home/chenyang9779/s2693586/performance_analysis/results/profile_500x500land_ts100.prof
+150x150land.dat,50,101.878,/home/chenyang9779/s2693586/performance_analysis/results/profile_150x150land_ts50.prof
+150x150land.dat,75,105.390,/home/chenyang9779/s2693586/performance_analysis/results/profile_150x150land_ts75.prof
+150x150land.dat,100,100.383,/home/chenyang9779/s2693586/performance_analysis/results/profile_150x150land_ts100.prof
+250x250land.dat,50,280.067,/home/chenyang9779/s2693586/performance_analysis/results/profile_250x250land_ts50.prof
+250x250land.dat,75,284.674,/home/chenyang9779/s2693586/performance_analysis/results/profile_250x250land_ts75.prof
+250x250land.dat,100,288.532,/home/chenyang9779/s2693586/performance_analysis/results/profile_250x250land_ts100.prof
+200x200land.dat,50,180.261,/home/chenyang9779/s2693586/performance_analysis/results/profile_200x200land_ts50.prof
+200x200land.dat,75,181.711,/home/chenyang9779/s2693586/performance_analysis/results/profile_200x200land_ts75.prof
+200x200land.dat,100,186.830,/home/chenyang9779/s2693586/performance_analysis/results/profile_200x200land_ts100.prof
+1000x1000land.dat,50,4656.138,/home/chenyang9779/s2693586/performance_analysis/results/profile_1000x1000land_ts50.prof
+1000x1000land.dat,75,4609.137,/home/chenyang9779/s2693586/performance_analysis/results/profile_1000x1000land_ts75.prof
+1000x1000land.dat,100,4627.990,/home/chenyang9779/s2693586/performance_analysis/results/profile_1000x1000land_ts100.prof
+50x50land.dat,50,13.327,/home/chenyang9779/s2693586/performance_analysis/results/profile_50x50land_ts50.prof
+50x50land.dat,75,11.006,/home/chenyang9779/s2693586/performance_analysis/results/profile_50x50land_ts75.prof
+50x50land.dat,100,11.006,/home/chenyang9779/s2693586/performance_analysis/results/profile_50x50land_ts100.prof
